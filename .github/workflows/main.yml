@@ -60,9 +60,7 @@ jobs:
 
     - name: Ejecutar pruebas de integración
       run: |
-        # Aquí puedes ejecutar tus pruebas de integración
-        # Ejemplo:
-        # npm run test:integration
+        npm run test
         echo "Aquí se ejecutan las pruebas de integración"
     
     - name: Detener entorno de pruebas
