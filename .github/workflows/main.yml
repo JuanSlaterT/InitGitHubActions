@@ -58,9 +58,9 @@ jobs:
       env:
         DOCKER_IMAGE: backend:latest
 
-    - name: Ejecutar pruebas de integración
+    - name: Ejecución de pruebas en el dockerizado
       run: |
-        npm run test
+        docker exec $(docker ps -q -f "ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable") npm test
         echo "Aquí se ejecutan las pruebas de integración"
     
     - name: Detener entorno de pruebas
