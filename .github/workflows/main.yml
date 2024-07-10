@@ -10,6 +10,7 @@ on:
 
 jobs:
   nodejs-backend-server-template:
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
