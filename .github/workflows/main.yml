@@ -30,22 +30,42 @@ jobs:
       with:
         github-token: ${{ secrets.SECRET_TOKEN }}
         annotations: none
+
     - name: Análisis de Código Estático con ESLint
       uses: sibiraj-s/action-eslint@v3
       with:
         eslint-args: '--ignore-path=.gitignore --quiet'
         extensions: 'js,jsx,ts,tsx'
         annotations: true
+
     - name: Construcción de Artefacto
       run: docker build -t backend .
+
     - name: Autenticación a Docker Hub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
     - name: Push de Artefacto a Docker Hub
       run: |
         docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+
+     - name: Desplegar entorno de pruebas
+      run: |
+        docker-compose -f docker-compose.test.yml up -d
+      env:
+        DOCKER_IMAGE: backend:latest
+
+    - name: Ejecutar pruebas de integración
+      run: |
+        # Aquí puedes ejecutar tus pruebas de integración
+        # Ejemplo:
+        # npm run test:integration
+        echo "Aquí se ejecutan las pruebas de integración"
     
+    - name: Detener entorno de pruebas
+      run: |
+        docker-compose -f docker-compose.test.yml down
 
