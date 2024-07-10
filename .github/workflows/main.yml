@@ -1,4 +1,5 @@
 name: CICD Kubernetes Pipeline
+
 on:
   push:
     branches:
@@ -8,7 +9,7 @@ on:
       - main
 
 jobs:
-  clone-repo:
+  clone-install-deps:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,3 +18,11 @@ jobs:
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18.17.1
+
+    - name: Install dependencies
+      run: npm install
