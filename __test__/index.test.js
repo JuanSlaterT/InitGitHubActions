@@ -5,6 +5,6 @@ describe("Initializing unit tests", () => {
     it("GET /", async () => {
         const response = await request(app).get("/")
         console.log(response)
-        expect(response.statusCode).toBe(200)
+        expect(response.statusCode).toBe(200);
     })
 })
