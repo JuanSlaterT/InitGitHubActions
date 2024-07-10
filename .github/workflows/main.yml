@@ -9,31 +9,21 @@ on:
       - main
 
 jobs:
-  clone-repo:
+  nodejs-backend-server-template:
     runs-on: ubuntu-latest
+    needs: install-deps
 
     steps:
-    - name: Checkout code
+    - name: Clonación de repositorio
       uses: actions/checkout@v2
-      with:
-        repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
 
-  install-deps:
-    runs-on: ubuntu-latest
-    needs: clone-repo
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
-
-    - name: Set up Node.js
+    - name: Instalando NodeJS
       uses: actions/setup-node@v2
       with:
-        node-version: 18.15.0
+        node-version: 18.17.0
 
-    - name: Install dependencies
+    - name: Instalando dependencias
       run: npm install
+
+    - name: Corriendo pruebas unitarias
+      run: npm test
