@@ -103,7 +103,8 @@ dist
 
 # vuepress build output
 .vuepress/dist
-
+coverage
+coverage/
 # vuepress v2.x temp and cache directory
 .temp
 
