@@ -3,6 +3,8 @@ const app = require("../app");
 
 describe("Initializing unit tests", () => {
     it("GET /", async () => {
-        console.log("OLA UWU")
+        const response = await request(app).get("/")
+        console.log(response)
+        expect(response.statusCode).toBe(200)
     })
 })
