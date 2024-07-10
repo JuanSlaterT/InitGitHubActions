@@ -34,7 +34,5 @@ jobs:
       uses: sibiraj-s/action-eslint@v3
       with:
         ignore-pattern: |
-          dist/
-          lib/
           coverage/
 
