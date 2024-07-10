@@ -1,0 +1,12 @@
+name: CICD Kubernetes Pipeline
+
+jobs:
+  clone-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
