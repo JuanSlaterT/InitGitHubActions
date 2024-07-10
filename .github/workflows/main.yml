@@ -36,4 +36,16 @@ jobs:
         eslint-args: '--ignore-path=.gitignore --quiet'
         extensions: 'js,jsx,ts,tsx'
         annotations: true
+    - name: Construcción de Artefacto
+      run: docker build -t backend .
+    - name: Autenticación a Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    - name: Push de Artefacto a Docker Hub
+      run: |
+        docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+    
 
