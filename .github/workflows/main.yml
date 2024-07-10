@@ -52,7 +52,7 @@ jobs:
         docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
 
-     - name: Desplegar entorno de pruebas
+    - name: Desplegar entorno de pruebas
       run: |
         docker-compose -f docker-compose.test.yml up -d
       env:
