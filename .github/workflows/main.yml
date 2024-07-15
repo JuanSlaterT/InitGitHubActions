@@ -1,4 +1,4 @@
-name: CICD Kubernetes Pipeline
+name: CICD Heroku Deploy Pipeline
 
 on:
   push:
