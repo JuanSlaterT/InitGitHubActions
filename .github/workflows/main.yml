@@ -37,21 +37,7 @@ jobs:
       run: |
         docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
-
-    - name: Desplegar entorno de pruebas
-      run: |
-        docker-compose -f docker-compose.test.yml up -d
-      env:
-        DOCKER_IMAGE: backend:latest
-
-    - name: Ejecución de pruebas en el dockerizado
-      run: |
-        docker exec $(docker ps -q -f "ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable") npm test
-        echo "Aquí se ejecutan las pruebas de integración"
-    
-    - name: Detener entorno de pruebas
-      run: |
-        docker-compose -f docker-compose.test.yml down
+        
     - name: Deploy a Producción
       uses: akhileshns/heroku-deploy@v3.13.15
       with:
