@@ -1,0 +1,68 @@
+{
+    "swagger": "3.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Arquetipo Pokemon",
+        "description": "Arquetipo con manejo de errores y logs con patrones",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "tags": [],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "definitions": {
+        "200-Pokemon": {
+            "result": {
+                "pokemon_entries": [
+                    {
+                        "entry_number": 1,
+                        "pokemon_species": {
+                            "name": "bulbasaur",
+                            "url": "https://pokeapi.co/api/v2/pokemon-species/1/"
+                        }
+                    },
+                    {
+                        "entry_number": 2,
+                        "pokemon_species": {
+                            "name": "ivysaur",
+                            "url": "https://pokeapi.co/api/v2/pokemon-species/2/"
+                        }
+                    },
+                    {
+                        "entry_number": 3,
+                        "pokemon_species": {
+                            "name": "venusaur",
+                            "url": "https://pokeapi.co/api/v2/pokemon-species/3/"
+                        }
+                    }
+                ]
+            }
+        },
+        "200-Pokemon-ByName": {
+            "pokemon": {
+                "name": "charmeleon",
+                "url": "https://pokeapi.co/api/v2/pokemon/5/"
+            },
+            "types": [
+                {
+                    "slot": 1,
+                    "type": {
+                        "name": "fire",
+                        "url": "https://pokeapi.co/api/v2/type/10/"
+                    }
+                }
+            ]
+        }
+    }
+}

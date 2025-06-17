@@ -1,0 +1,218 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Arquetipo Pokemon",
+    "description": "Arquetipo con manejo de errores y logs con patrones",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/pokemon/": {
+      "get": {
+        "tags": [
+          "POKEMON"
+        ],
+        "description": "Servicio para obtener todos los pokemon",
+        "parameters": [
+          {
+            "name": "x-country",
+            "in": "header",
+            "description": "Codigo del país bajo el estándar ISO 3166-1 alpha2 - Ej: CR, CL, PE, etc.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-commerce",
+            "in": "header",
+            "description": "Comercio indicado por el consumidor del servicio - Ej: IXC.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-customerid",
+            "in": "header",
+            "description": "Nombre asociado al comercio - Ej: SAMSUNG, XIAOMI, etc.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-channel",
+            "in": "header",
+            "description": "Identificador del canal - Ej: WL180, WL360.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-usrtx",
+            "in": "header",
+            "description": "Representa una transacción de usuario - Ej: 8948542.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa",
+            "schema": {
+              "$ref": "#/definitions/200-Pokemon"
+            }
+          }
+        }
+      }
+    },
+    "/pokemon/byName/{pokemonName}/": {
+      "get": {
+        "tags": [
+          "POKEMON"
+        ],
+        "description": "Servicio para obtener el detalle de un pokemon",
+        "parameters": [
+          {
+            "name": "pokemonName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nombre del pokemon"
+          },
+          {
+            "name": "x-country",
+            "in": "header",
+            "description": "Codigo del país bajo el estándar ISO 3166-1 alpha2 - Ej: CR, CL, PE, etc.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-commerce",
+            "in": "header",
+            "description": "Comercio indicado por el consumidor del servicio - Ej: IXC.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-customerid",
+            "in": "header",
+            "description": "Nombre asociado al comercio - Ej: SAMSUNG, XIAOMI, etc.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-channel",
+            "in": "header",
+            "description": "Identificador del canal - Ej: WL180, WL360.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-usrtx",
+            "in": "header",
+            "description": "Representa una transacción de usuario - Ej: 8948542.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa",
+            "schema": {
+              "$ref": "#/definitions/200-Pokemon-ByName"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "200-Pokemon": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "pokemon_entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entry_number": {
+                    "type": "number",
+                    "example": 3
+                  },
+                  "pokemon_species": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "venusaur"
+                      },
+                      "url": {
+                        "type": "string",
+                        "example": "https://pokeapi.co/api/v2/pokemon-species/3/"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "200-Pokemon-ByName": {
+      "type": "object",
+      "properties": {
+        "pokemon": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "charmeleon"
+            },
+            "url": {
+              "type": "string",
+              "example": "https://pokeapi.co/api/v2/pokemon/5/"
+            }
+          }
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "number",
+                "example": 1
+              },
+              "type": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "fire"
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "https://pokeapi.co/api/v2/type/10/"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

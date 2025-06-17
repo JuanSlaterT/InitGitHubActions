@@ -1,0 +1,11 @@
+.gitlab-ci.yml
+.gitignore
+Dockerfile
+k8s/
+*.md
+oracle/
+node_modules/
+coverage/
+.vscode/
+__mocks__/
+jest.config.js
