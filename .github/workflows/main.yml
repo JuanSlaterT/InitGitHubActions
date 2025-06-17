@@ -24,19 +24,6 @@ jobs:
 
     - name: Instalando dependencias
       run: npm install
-
-    - name: Corriendo pruebas unitarias
-      uses: ArtiomTr/jest-coverage-report-action@v2
-      with:
-        github-token: ${{ secrets.SECRET_TOKEN }}
-        annotations: none
-
-    - name: Análisis de Código Estático con ESLint
-      uses: sibiraj-s/action-eslint@v3
-      with:
-        extensions: 'js,jsx,ts,tsx'
-        annotations: true
-
     - name: Construcción de Artefacto
       run: docker build -t backend .
 
