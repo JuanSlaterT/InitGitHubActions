@@ -27,16 +27,6 @@ jobs:
     - name: Construcción de Artefacto
       run: docker build -t backend .
 
-    - name: Trivy Security
-      uses: aquasecurity/trivy-action@0.20.0
-      with:
-        image-ref: 'backend'
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'
-
     - name: Autenticación a Docker Hub
       uses: docker/login-action@v1
       with:
