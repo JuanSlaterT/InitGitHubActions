@@ -16,22 +16,16 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - email_persona
- *               - created_at
- *               - type
+ *               - cert_type_id
  *               - meeting
  *             properties:
  *               email_persona:
  *                 type: string
  *                 format: email
  *                 description: Email de la persona que recibe el reconocimiento
- *               created_at:
- *                 type: string
- *                 format: date
- *                 description: Fecha de creación del reconocimiento
- *               type:
- *                 type: string
- *                 maxLength: 20
- *                 description: Tipo de reconocimiento
+ *               cert_type_id:
+ *                 type: integer
+ *                 description: ID del tipo de certificado
  *               meeting:
  *                 type: string
  *                 maxLength: 64
@@ -42,7 +36,7 @@ const router = express.Router();
  *       400:
  *         description: Datos inválidos
  *       404:
- *         description: Persona no encontrada
+ *         description: Persona o tipo de certificado no encontrado
  */
 router.post('/', ReconocimientoController.createReconocimiento);
 
@@ -113,22 +107,41 @@ router.get('/email/:email', ReconocimientoController.getReconocimientosByEmail);
 
 /**
  * @swagger
- * /api/reconocimiento/type/{type}:
+ * /api/reconocimiento/cert-type/{cert_type_id}:
  *   get:
- *     summary: Obtener reconocimientos por tipo
+ *     summary: Obtener reconocimientos por ID de tipo de certificado
  *     tags: [Reconocimiento]
  *     parameters:
  *       - in: path
- *         name: type
+ *         name: cert_type_id
  *         required: true
  *         schema:
- *           type: string
- *         description: Tipo de reconocimiento
+ *           type: integer
+ *         description: ID del tipo de certificado
  *     responses:
  *       200:
  *         description: Reconocimientos encontrados
  */
-router.get('/type/:type', ReconocimientoController.getReconocimientosByType);
+router.get('/cert-type/:cert_type_id', ReconocimientoController.getReconocimientosByCertTypeId);
+
+/**
+ * @swagger
+ * /api/reconocimiento/tipo/{tipo}:
+ *   get:
+ *     summary: Obtener reconocimientos por tipo de certificado
+ *     tags: [Reconocimiento]
+ *     parameters:
+ *       - in: path
+ *         name: tipo
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tipo de certificado (ej: KUDOS, ACHIEVEMENT, THANKYOU)
+ *     responses:
+ *       200:
+ *         description: Reconocimientos encontrados
+ */
+router.get('/tipo/:tipo', ReconocimientoController.getReconocimientosByTipo);
 
 /**
  * @swagger
@@ -153,12 +166,8 @@ router.get('/type/:type', ReconocimientoController.getReconocimientosByType);
  *               email_persona:
  *                 type: string
  *                 format: email
- *               created_at:
- *                 type: string
- *                 format: date
- *               type:
- *                 type: string
- *                 maxLength: 20
+ *               cert_type_id:
+ *                 type: integer
  *               meeting:
  *                 type: string
  *                 maxLength: 64

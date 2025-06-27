@@ -151,33 +151,69 @@ async function getReconocimientosByEmail(req, res, next) {
 }
 
 /**
- * Controlador para obtener reconocimientos por tipo
+ * Controlador para obtener reconocimientos por tipo de certificado (ID)
+ * @param {Request} req - Request con el cert_type_id en params
+ * @param {Response} res - Response para enviar la respuesta
+ * @param {NextFunction} next - Función next para manejo de errores
+ */
+async function getReconocimientosByCertTypeId(req, res, next) {
+    try {
+        const { cert_type_id } = req.params;
+        console.log('Se recibe el request en getReconocimientosByCertTypeId');
+        logFormat({
+            type: 'info',
+            file: 'reconocimiento.controller',
+            headers: req.headers,
+            _function: 'getReconocimientosByCertTypeId',
+            message: 'Se recibe el request para obtener reconocimientos por tipo de certificado ID',
+            data: { cert_type_id }
+        });
+
+        const result = await reconocimientoService.getReconocimientosByCertTypeId(cert_type_id);
+
+        logFormat({
+            type: 'info',
+            file: 'reconocimiento.controller',
+            headers: req.headers,
+            _function: 'getReconocimientosByCertTypeId',
+            message: 'Reconocimientos obtenidos exitosamente',
+            data: { cert_type_id, count: result.length }
+        });
+
+        res.status(200).send({ result });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Controlador para obtener reconocimientos por tipo de certificado (tipo)
  * @param {Request} req - Request con el tipo en params
  * @param {Response} res - Response para enviar la respuesta
  * @param {NextFunction} next - Función next para manejo de errores
  */
-async function getReconocimientosByType(req, res, next) {
+async function getReconocimientosByTipo(req, res, next) {
     try {
-        const { type } = req.params;
-        console.log('Se recibe el request en getReconocimientosByType');
+        const { tipo } = req.params;
+        console.log('Se recibe el request en getReconocimientosByTipo');
         logFormat({
             type: 'info',
             file: 'reconocimiento.controller',
             headers: req.headers,
-            _function: 'getReconocimientosByType',
+            _function: 'getReconocimientosByTipo',
             message: 'Se recibe el request para obtener reconocimientos por tipo',
-            data: { type }
+            data: { tipo }
         });
 
-        const result = await reconocimientoService.getReconocimientosByType(type);
+        const result = await reconocimientoService.getReconocimientosByTipo(tipo);
 
         logFormat({
             type: 'info',
             file: 'reconocimiento.controller',
             headers: req.headers,
-            _function: 'getReconocimientosByType',
+            _function: 'getReconocimientosByTipo',
             message: 'Reconocimientos obtenidos exitosamente',
-            data: { type, count: result.length }
+            data: { tipo, count: result.length }
         });
 
         res.status(200).send({ result });
@@ -270,8 +306,8 @@ async function deleteReconocimiento(req, res, next) {
         });
 
         res.status(200).send({ 
-            result,
-            message: 'Reconocimiento eliminado exitosamente'
+            message: 'Reconocimiento eliminado exitosamente',
+            result 
         });
     } catch (error) {
         next(error);
@@ -303,7 +339,7 @@ async function getReconocimientoStats(req, res, next) {
             headers: req.headers,
             _function: 'getReconocimientoStats',
             message: 'Estadísticas obtenidas exitosamente',
-            data: { statsCount: result.length }
+            data: { count: result.length }
         });
 
         res.status(200).send({ result });
@@ -317,7 +353,8 @@ module.exports = {
     getAllReconocimientos,
     getReconocimientoById,
     getReconocimientosByEmail,
-    getReconocimientosByType,
+    getReconocimientosByCertTypeId,
+    getReconocimientosByTipo,
     updateReconocimiento,
     deleteReconocimiento,
     getReconocimientoStats

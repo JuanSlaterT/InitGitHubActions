@@ -4,22 +4,21 @@ const { db } = require('../../config/database');
  * Crear un nuevo reconocimiento
  * @param {Object} reconocimientoData - Datos del reconocimiento
  * @param {string} reconocimientoData.email_persona - Email de la persona
- * @param {Date} reconocimientoData.created_at - Fecha de creación
- * @param {string} reconocimientoData.type - Tipo de reconocimiento
+ * @param {number} reconocimientoData.cert_type_id - ID del tipo de certificado
  * @param {string} reconocimientoData.meeting - Reunión
  * @returns {Object} Reconocimiento creado
  */
 async function createReconocimiento(reconocimientoData) {
-    const { email_persona, created_at, type, meeting } = reconocimientoData;
+    const { email_persona, cert_type_id, meeting } = reconocimientoData;
     
     const query = `
-        INSERT INTO reconocimiento (email_persona, created_at, type, meeting)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO reconocimiento (email_persona, cert_type_id, meeting)
+        VALUES ($1, $2, $3)
         RETURNING *
     `;
     
     try {
-        const result = await db.one(query, [email_persona, created_at, type, meeting]);
+        const result = await db.one(query, [email_persona, cert_type_id, meeting]);
         return result;
     } catch (error) {
         throw new Error(`Error al crear reconocimiento: ${error.message}`);
@@ -27,14 +26,21 @@ async function createReconocimiento(reconocimientoData) {
 }
 
 /**
- * Obtener todos los reconocimientos
+ * Obtener todos los reconocimientos con información completa
  * @returns {Array} Lista de todos los reconocimientos
  */
 async function getAllReconocimientos() {
     const query = `
-        SELECT r.*, p.full_name, p.team, p.role
+        SELECT 
+            r.*,
+            p.full_name, 
+            p.team, 
+            p.role,
+            ct.tipo as cert_type_tipo,
+            ct.nombre as cert_type_nombre
         FROM reconocimiento r
         JOIN persona p ON r.email_persona = p.email
+        JOIN cert_type ct ON r.cert_type_id = ct.id
         ORDER BY r.created_at DESC, r.id DESC
     `;
     
@@ -47,15 +53,22 @@ async function getAllReconocimientos() {
 }
 
 /**
- * Obtener un reconocimiento por ID
+ * Obtener un reconocimiento por ID con información completa
  * @param {number} id - ID del reconocimiento
  * @returns {Object} Reconocimiento encontrado
  */
 async function getReconocimientoById(id) {
     const query = `
-        SELECT r.*, p.full_name, p.team, p.role
+        SELECT 
+            r.*,
+            p.full_name, 
+            p.team, 
+            p.role,
+            ct.tipo as cert_type_tipo,
+            ct.nombre as cert_type_nombre
         FROM reconocimiento r
         JOIN persona p ON r.email_persona = p.email
+        JOIN cert_type ct ON r.cert_type_id = ct.id
         WHERE r.id = $1
     `;
     
@@ -74,9 +87,16 @@ async function getReconocimientoById(id) {
  */
 async function getReconocimientosByEmail(email_persona) {
     const query = `
-        SELECT r.*, p.full_name, p.team, p.role
+        SELECT 
+            r.*,
+            p.full_name, 
+            p.team, 
+            p.role,
+            ct.tipo as cert_type_tipo,
+            ct.nombre as cert_type_nombre
         FROM reconocimiento r
         JOIN persona p ON r.email_persona = p.email
+        JOIN cert_type ct ON r.cert_type_id = ct.id
         WHERE r.email_persona = $1
         ORDER BY r.created_at DESC, r.id DESC
     `;
@@ -90,21 +110,57 @@ async function getReconocimientosByEmail(email_persona) {
 }
 
 /**
- * Obtener reconocimientos por tipo
- * @param {string} type - Tipo de reconocimiento
+ * Obtener reconocimientos por tipo de certificado
+ * @param {number} cert_type_id - ID del tipo de certificado
  * @returns {Array} Lista de reconocimientos del tipo especificado
  */
-async function getReconocimientosByType(type) {
+async function getReconocimientosByCertTypeId(cert_type_id) {
     const query = `
-        SELECT r.*, p.full_name, p.team, p.role
+        SELECT 
+            r.*,
+            p.full_name, 
+            p.team, 
+            p.role,
+            ct.tipo as cert_type_tipo,
+            ct.nombre as cert_type_nombre
         FROM reconocimiento r
         JOIN persona p ON r.email_persona = p.email
-        WHERE r.type = $1
+        JOIN cert_type ct ON r.cert_type_id = ct.id
+        WHERE r.cert_type_id = $1
         ORDER BY r.created_at DESC, r.id DESC
     `;
     
     try {
-        const result = await db.any(query, [type]);
+        const result = await db.any(query, [cert_type_id]);
+        return result;
+    } catch (error) {
+        throw new Error(`Error al obtener reconocimientos por tipo: ${error.message}`);
+    }
+}
+
+/**
+ * Obtener reconocimientos por tipo de certificado (usando el campo tipo)
+ * @param {string} tipo - Tipo de certificado (ej: KUDOS, ACHIEVEMENT, THANKYOU)
+ * @returns {Array} Lista de reconocimientos del tipo especificado
+ */
+async function getReconocimientosByTipo(tipo) {
+    const query = `
+        SELECT 
+            r.*,
+            p.full_name, 
+            p.team, 
+            p.role,
+            ct.tipo as cert_type_tipo,
+            ct.nombre as cert_type_nombre
+        FROM reconocimiento r
+        JOIN persona p ON r.email_persona = p.email
+        JOIN cert_type ct ON r.cert_type_id = ct.id
+        WHERE ct.tipo = $1
+        ORDER BY r.created_at DESC, r.id DESC
+    `;
+    
+    try {
+        const result = await db.any(query, [tipo]);
         return result;
     } catch (error) {
         throw new Error(`Error al obtener reconocimientos por tipo: ${error.message}`);
@@ -116,23 +172,22 @@ async function getReconocimientosByType(type) {
  * @param {number} id - ID del reconocimiento a actualizar
  * @param {Object} updateData - Datos a actualizar
  * @param {string} updateData.email_persona - Email de la persona
- * @param {Date} updateData.created_at - Fecha de creación
- * @param {string} updateData.type - Tipo de reconocimiento
+ * @param {number} updateData.cert_type_id - ID del tipo de certificado
  * @param {string} updateData.meeting - Reunión
  * @returns {Object} Reconocimiento actualizado
  */
 async function updateReconocimiento(id, updateData) {
-    const { email_persona, created_at, type, meeting } = updateData;
+    const { email_persona, cert_type_id, meeting } = updateData;
     
     const query = `
         UPDATE reconocimiento 
-        SET email_persona = $1, created_at = $2, type = $3, meeting = $4
-        WHERE id = $5
+        SET email_persona = $1, cert_type_id = $2, meeting = $3, updated_at = NOW()
+        WHERE id = $4
         RETURNING *
     `;
     
     try {
-        const result = await db.oneOrNone(query, [email_persona, created_at, type, meeting, id]);
+        const result = await db.oneOrNone(query, [email_persona, cert_type_id, meeting, id]);
         return result;
     } catch (error) {
         throw new Error(`Error al actualizar reconocimiento: ${error.message}`);
@@ -163,11 +218,13 @@ async function getReconocimientoStats() {
     const query = `
         SELECT 
             COUNT(*) as total_reconocimientos,
-            COUNT(DISTINCT email_persona) as personas_con_reconocimientos,
-            type,
+            COUNT(DISTINCT r.email_persona) as personas_con_reconocimientos,
+            ct.tipo,
+            ct.nombre,
             COUNT(*) as count_by_type
-        FROM reconocimiento 
-        GROUP BY type
+        FROM reconocimiento r
+        JOIN cert_type ct ON r.cert_type_id = ct.id
+        GROUP BY ct.id, ct.tipo, ct.nombre
         ORDER BY count_by_type DESC
     `;
     
@@ -184,7 +241,8 @@ module.exports = {
     getAllReconocimientos,
     getReconocimientoById,
     getReconocimientosByEmail,
-    getReconocimientosByType,
+    getReconocimientosByCertTypeId,
+    getReconocimientosByTipo,
     updateReconocimiento,
     deleteReconocimiento,
     getReconocimientoStats
