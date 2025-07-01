@@ -15,7 +15,7 @@ CREATE TABLE persona (
     team        VARCHAR(24)  NOT NULL,
     role        VARCHAR(32)  NOT NULL,
     is_admin    BOOLEAN      DEFAULT FALSE,
-    is_enabled  BOOLEAN      DEFAULT TRUE,
+    is_enabled  BOOLEAN      DEFAULT FALSE,
     created_at  TIMESTAMPTZ  DEFAULT NOW(),
     updated_at  TIMESTAMPTZ  DEFAULT NOW()
 );
