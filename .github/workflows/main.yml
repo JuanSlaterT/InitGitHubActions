@@ -49,7 +49,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}   # ec2-user, ubuntu, etc.
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           debug: true
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 22
           script: |
             set -euo pipefail
