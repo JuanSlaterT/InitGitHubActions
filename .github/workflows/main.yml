@@ -58,32 +58,32 @@ jobs:
         continue-on-error: true
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ env.EC2_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.EC2_PORT }}
-          debug: true
-          script: echo "✅ Conexión SSH exitosa"
+          host:        ${{ secrets.EC2_HOST }}
+          username:    ${{ env.EC2_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase:  ${{ secrets.SSH_PASSPHRASE }}
+          port:        ${{ env.EC2_PORT }}
+          debug:       true
+          allenvs:     true
+          script:      echo "✅ Conexión SSH exitosa"
 
+      # ── Despliegue ─────────────────────────────────────
       - name: Deploy backend
         uses: appleboy/ssh-action@v1.0.0
-        env:
-          DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ env.EC2_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.EC2_PORT }}
-          debug: true
-          script_stop: true
-          allenvs: true
+          host:        ${{ secrets.EC2_HOST }}
+          username:    ${{ env.EC2_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase:  ${{ secrets.SSH_PASSPHRASE }}
+          port:        ${{ env.EC2_PORT }}
+          debug:       true
+          script_stop: true     # aborta en el 1er error
+          envs:        DOCKER_IMAGE
           script: |
             set -Eeuo pipefail
 
             echo "🛫  Actualizando imagen..."
-            sudo docker pull "$DOCKER_IMAGE"
+            sudo docker pull $DOCKER_IMAGE
 
             echo "⛔  Deteniendo contenedor anterior (si existe)..."
             sudo docker rm -f backend 2>/dev/null || true
@@ -92,11 +92,8 @@ jobs:
             sudo docker run -d \
               --name backend \
               --restart=always \
-              -p 80:8080 \
-              -e API_KEY \
-              -e DATABASE_URL \
-              -e NODE_ENV \
-              "$DOCKER_IMAGE"
+              -p 80:3000 \
+              $DOCKER_IMAGE
 
             echo "🧹  Limpiando imágenes antiguas..."
             sudo docker image prune -f
