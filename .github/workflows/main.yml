@@ -10,6 +10,7 @@ env:
   DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
   EC2_USER: ec2-user
   EC2_PORT: 22
+  
 
 jobs:
 # ─────────────────────────────────────────────────────────
