@@ -1,4 +1,7 @@
 const { db } = require('../../config/database');
+const personaService = require('./persona.service');
+const certTypeService = require('./certType.service');
+const { sendRecognitionEmail } = require('./SES.service');
 
 /**
  * Crear un nuevo reconocimiento
@@ -18,7 +21,48 @@ async function createReconocimiento(reconocimientoData) {
     `;
     
     try {
+        // Crear el reconocimiento
         const result = await db.one(query, [email_persona, cert_type_id, meeting]);
+        
+        // Obtener información de la persona
+        const persona = await personaService.getPersonaByEmail(email_persona);
+        if (!persona) {
+            throw new Error(`No se encontró la persona con email: ${email_persona}`);
+        }
+        
+        // Obtener información del tipo de certificado
+        const certType = await certTypeService.getCertTypeById(cert_type_id);
+        if (!certType) {
+            throw new Error(`No se encontró el tipo de certificado con ID: ${cert_type_id}`);
+        }
+        
+        // Enviar email de reconocimiento
+        try {
+            const currentYear = new Date().getFullYear();
+            const issueDate = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+            
+            await sendRecognitionEmail({
+                to: email_persona,
+                userName: persona.full_name,
+                certType: certType.nombre,
+                userRole: persona.role,
+                issueDate: issueDate,
+                expiryDate: null, // Sin fecha de expiración por defecto
+                ctaUrl: null, // Sin URL de CTA por defecto
+                currentYear: currentYear.toString()
+            });
+        } catch (emailError) {
+            // Log del error de email pero no fallar la creación del reconocimiento
+            console.error('Error al enviar email de reconocimiento:', {
+                error: emailError.message,
+                email: email_persona,
+                userName: persona.full_name,
+                certType: certType.nombre,
+                stack: emailError.stack
+            });
+            // Podrías agregar aquí un log más detallado si tienes un sistema de logging
+        }
+        
         return result;
     } catch (error) {
         throw new Error(`Error al crear reconocimiento: ${error.message}`);

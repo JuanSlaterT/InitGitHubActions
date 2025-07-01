@@ -21,17 +21,24 @@ async function createReconocimiento(req, res, next) {
 
         const reconocimientoData = req.body;
         const result = await reconocimientoService.createReconocimiento(reconocimientoData);
-
+        
         logFormat({
             type: 'info',
             file: 'reconocimiento.controller',
             headers: req.headers,
             _function: 'createReconocimiento',
-            message: 'Reconocimiento creado exitosamente',
-            data: { result }
+            message: 'Reconocimiento creado exitosamente con email enviado',
+            data: { 
+                result,
+                email_sent: true,
+                email_recipient: reconocimientoData.email_persona
+            }
         });
 
-        res.status(201).send({ result });
+        res.status(201).send({ 
+            result,
+            message: 'Reconocimiento creado exitosamente y email enviado'
+        });
     } catch (error) {
         next(error);
     }

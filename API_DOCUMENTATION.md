@@ -337,7 +337,7 @@ CREATE TABLE reconocimiento (
 
 #### 1. Crear Reconocimiento
 - **POST** `/api/reconocimiento`
-- **Descripción**: Crea un nuevo reconocimiento para una persona
+- **Descripción**: Crea un nuevo reconocimiento para una persona y envía un email de notificación automáticamente
 - **Body**:
 ```json
 {
@@ -356,9 +356,15 @@ CREATE TABLE reconocimiento (
         "meeting": "Reunión Mensual Enero",
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
-    }
+    },
+    "message": "Reconocimiento creado exitosamente y email enviado"
 }
 ```
+- **Notas**:
+  - El sistema automáticamente consulta la información de la persona (nombre y rol) en la tabla `persona`
+  - El sistema consulta la información del tipo de certificado en la tabla `cert_type`
+  - Se envía un email de reconocimiento usando AWS SES con la plantilla `email_reconocimiento_template`
+  - Si el envío del email falla, el reconocimiento se crea igualmente pero se registra el error en los logs
 
 #### 2. Obtener Todos los Reconocimientos
 - **GET** `/api/reconocimiento`
