@@ -38,6 +38,7 @@ async function createPersona(personaData) {
             ctaApproveUrl: `https://www.ixcsvs.online/active/${result.email}`,
             currentYear: new Date().getFullYear()
         })));
+        
         return result;
     } catch (error) {
         throw new Error(`Error al crear persona: ${error.message}`);

@@ -101,7 +101,7 @@ jobs:
               --name backend \
               --restart=always \
               --env-file /tmp/env.list \
-              -p 80:8080 \
+              -p 8080:8080 \
               $DOCKER_IMAGE
 
             echo "🧹  Limpiando imágenes antiguas..."
