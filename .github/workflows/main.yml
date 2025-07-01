@@ -36,17 +36,27 @@ jobs:
           docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
 
-
   deploy-to-ec2:
-    needs: build-and-push 
+    needs: build-and-push
     runs-on: ubuntu-latest
-
     steps:
+      - name: Smoke-test SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: 22
+          debug: true
+          script: |
+            echo "✅ Conexión SSH exitosa desde GitHub Actions"
+
       - name: Deploy backend
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.SSH_USER }}   # ec2-user, ubuntu, etc.
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           debug: true
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
