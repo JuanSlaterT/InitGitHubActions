@@ -8,6 +8,7 @@ const { logFormat } = require('../Helpers/Utils');
  * @param {NextFunction} next - Función next para manejo de errores
  */
 
+
 async function createPersona(req, res, next) {
     try {
         console.log('Se recibe el request en createPersona');
