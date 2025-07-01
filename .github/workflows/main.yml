@@ -1,4 +1,4 @@
-name: CICD Heroku Deploy Pipeline
+name: CICD - Build, Push & Deploy
 
 on:
   push:
@@ -6,15 +6,24 @@ on:
   pull_request_target:
     branches: [main]
 
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+  EC2_USER: ec2-user
+  EC2_PORT: 22
+
 jobs:
+# ─────────────────────────────────────────────────────────
+# 1) Build & push la imagen a Docker Hub
+# ─────────────────────────────────────────────────────────
   build-and-push:
     runs-on: ubuntu-latest
     permissions: write-all
+
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node 18
         uses: actions/setup-node@v4
         with:
           node-version: 18.17.0
@@ -33,50 +42,56 @@ jobs:
 
       - name: Push image
         run: |
-          docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+          docker tag backend $DOCKER_IMAGE
+          docker push $DOCKER_IMAGE
 
+# ─────────────────────────────────────────────────────────
+# 2) Despliegue en EC2
+# ─────────────────────────────────────────────────────────
   deploy-to-ec2:
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
-      - name: Smoke-test SSH
+      # ── Smoke test opcional ────────────────────────────
+      - name: Smoke-test SSH (opcional)
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22
-          debug: true
-          script: |
-            echo "✅ Conexión SSH exitosa desde GitHub Actions"
+          host:        ${{ secrets.EC2_HOST }}
+          username:    ${{ env.EC2_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase:  ${{ secrets.SSH_PASSPHRASE }}
+          port:        ${{ env.EC2_PORT }}
+          debug:       true
+          script:      echo "✅ Conexión SSH exitosa"
 
-            - name: Deploy backend
-            uses: appleboy/ssh-action@v1.0.0
-            with:
-              host:        ${{ secrets.EC2_HOST }}
-              username:    ec2-user                # o ubuntu, etc.
-              key:         ${{ secrets.SSH_PRIVATE_KEY }}
-              passphrase:  ${{ secrets.SSH_PASSPHRASE }}
-              port:        22
-              debug:       true          # deja activo hasta que funcione
-              script_stop: true          # aborta si un comando da error
-              script: |
-                set -Eeuo pipefail           # -E conserva traps con 'set -e'
-          
-                echo "🛫  Actualizando imagen..."
-                sudo docker pull registry.example.com/backend:stable
-          
-                echo "⛔  Deteniendo contenedor anterior (si existe)..."
-                sudo docker rm -f backend 2>/dev/null || true
-          
-                echo "🚀  Lanzando contenedor..."
-                sudo docker run -d \
-                  --name backend \
-                  --restart=always \
-                  -p 80:3000 \
-                  registry.example.com/backend:stable
-          
-                echo "🧹  Limpiando imágenes antiguas..."
-                sudo docker image prune -f
+      # ── Despliegue ─────────────────────────────────────
+      - name: Deploy backend
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host:        ${{ secrets.EC2_HOST }}
+          username:    ${{ env.EC2_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase:  ${{ secrets.SSH_PASSPHRASE }}
+          port:        ${{ env.EC2_PORT }}
+          debug:       true
+          script_stop: true     # aborta en el 1er error
+          script: |
+            set -Eeuo pipefail
+
+            echo "🛫  Actualizando imagen..."
+            sudo docker pull $DOCKER_IMAGE
+
+            echo "⛔  Deteniendo contenedor anterior (si existe)..."
+            sudo docker rm -f backend 2>/dev/null || true
+
+            echo "🚀  Lanzando contenedor..."
+            sudo docker run -d \
+              --name backend \
+              --restart=always \
+              -p 80:3000 \
+              $DOCKER_IMAGE
+
+            echo "🧹  Limpiando imágenes antiguas..."
+            sudo docker image prune -f
