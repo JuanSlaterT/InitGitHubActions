@@ -42,29 +42,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
+      - name: Deploy backend
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ${{ secrets.SSH_USER }}   # ec2-user, ubuntu, etc.
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -e
-            echo "🛫 Actualizando imagen..."
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+            set -euo pipefail
 
-            # Detén y elimina el contenedor anterior si existe
-            if docker ps -q --filter "name=backend" | grep -q .; then
-              docker stop backend
-              docker rm backend
-            fi
+            echo "🛫  Actualizando imagen..."
+            sudo docker pull registry.example.com/backend:stable
 
-            echo "🚀 Lanzando contenedor..."
-            docker run -d \
+            echo "⛔  Deteniendo contenedor anterior (si existe)..."
+            sudo docker rm -f backend 2>/dev/null || true
+
+            echo "🚀  Lanzando contenedor..."
+            sudo docker run -d \
               --name backend \
-              --restart always \
+              --restart=always \
               -p 80:3000 \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+              registry.example.com/backend:stable
 
-            # Limpieza opcional
-            docker image prune -f
+            echo "🧹  Limpiando imágenes antiguas..."
+            sudo docker image prune -f
+
