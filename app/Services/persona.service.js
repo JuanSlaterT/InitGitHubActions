@@ -35,7 +35,7 @@ async function createPersona(personaData) {
             registrationDate: new Date().toISOString(),
             team: result.team,
             requestedRole: result.role,
-            ctaApproveUrl: `https://www.ixcsvs.online/activar/${result.email}`,
+            ctaApproveUrl: `https://www.ixcsvs.online/active/${result.email}`,
             currentYear: new Date().getFullYear()
         })));
         return result;
