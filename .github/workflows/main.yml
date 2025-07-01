@@ -83,7 +83,7 @@ jobs:
           port:        ${{ env.EC2_PORT }}
           debug:       true
           script_stop: true     # aborta en el 1er error
-          envs:        DOCKER_IMAGE
+          envs:        DOCKER_IMAGE,ENV_B64
           script: |
             set -Eeuo pipefail
 
