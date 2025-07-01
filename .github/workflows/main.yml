@@ -2,40 +2,68 @@ name: CICD Heroku Deploy Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request_target:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  nodejs-backend-server-template:
+  build-and-push:
+    runs-on: ubuntu-latest
     permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build Docker image
+        run: docker build -t backend .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
+
+  deploy-to-ec2:
+    needs: build-and-push 
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonación de repositorio
-      uses: actions/checkout@v2
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            echo "🛫 Actualizando imagen..."
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
 
-    - name: Instalando NodeJS
-      uses: actions/setup-node@v2
-      with:
-        node-version: 18.17.0
+            # Detén y elimina el contenedor anterior si existe
+            if docker ps -q --filter "name=backend" | grep -q .; then
+              docker stop backend
+              docker rm backend
+            fi
 
-    - name: Instalando dependencias
-      run: npm install
-    - name: Construcción de Artefacto
-      run: docker build -t backend .
+            echo "🚀 Lanzando contenedor..."
+            docker run -d \
+              --name backend \
+              --restart always \
+              -p 80:3000 \
+              ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
 
-    - name: Autenticación a Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-    - name: Push de Artefacto a Docker Hub
-      run: |
-        docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
-        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
-
-
+            # Limpieza opcional
+            docker image prune -f
