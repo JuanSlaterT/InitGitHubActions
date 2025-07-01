@@ -9,6 +9,41 @@ const ses = new SESClient({
   },
 });
 
+/**
+ * Envía al administrador la solicitud para aprobar un nuevo usuario
+ * (si desea rechazar, simplemente ignora el correo).
+ */
+async function sendApprovalRequestEmail({
+  to,                // correo del admin
+  adminName,         // nombre del admin
+  newUserName,       // nombre del usuario a aprobar
+  newUserEmail,      // correo del usuario a aprobar
+  registrationDate,  // fecha de registro
+  team,              // equipo o área propuesta
+  requestedRole,     // rol solicitado
+  ctaApproveUrl,     // enlace para aprobar
+  currentYear,       // año actual
+}) {
+  const params = {
+    Source: "IXComercio <noreply@ixcsvs.online>",
+    Destination: { ToAddresses: [to] },
+    Template: "email_aprobacion_template", // asegúrate de que el template exista en SES
+    TemplateData: JSON.stringify({
+      admin_name:        adminName,
+      new_user_name:     newUserName,
+      new_user_email:    newUserEmail,
+      registration_date: registrationDate,
+      team,
+      requested_role:    requestedRole,
+      cta_approve_url:   ctaApproveUrl,
+      current_year:      currentYear,
+    }),
+  };
+
+  return ses.send(new SendTemplatedEmailCommand(params));
+}
+
+
 async function sendRecognitionEmail({
   to,
   userName,
@@ -29,7 +64,7 @@ async function sendRecognitionEmail({
       user_role: userRole,
       issue_date: issueDate,
       expiry_date: expiryDate || "Sin definir",
-      cta_url: ctaUrl ||"Sin definir",
+      cta_url: ctaUrl || "Sin definir",
       current_year: currentYear,
     }),
   };
@@ -39,5 +74,6 @@ async function sendRecognitionEmail({
 }
 
 module.exports = {
-  sendRecognitionEmail
+  sendRecognitionEmail,
+  sendApprovalRequestEmail
 };

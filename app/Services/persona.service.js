@@ -1,4 +1,5 @@
 const { db } = require('../../config/database');
+const { sendApprovalRequestEmail } = require('./SES.service');
 
 /**
  * Crear una nueva persona
@@ -23,6 +24,20 @@ async function createPersona(personaData) {
     
     try {
         const result = await db.one(query, [email, full_name, url_image, team, role, is_admin, is_enabled]);
+        // Obtener todos los administradores
+        const admins = await db.any('SELECT email, full_name FROM persona WHERE is_admin = true AND is_enabled = true');
+        // Enviar correo a cada admin
+        await Promise.all(admins.map(admin => sendApprovalRequestEmail({
+            to: admin.email,
+            adminName: admin.full_name,
+            newUserName: result.full_name,
+            newUserEmail: result.email,
+            registrationDate: new Date().toISOString(),
+            team: result.team,
+            requestedRole: result.role,
+            ctaApproveUrl: `https://www.ixcsvs.online/activar/${result.email}`,
+            currentYear: new Date().getFullYear()
+        })));
         return result;
     } catch (error) {
         throw new Error(`Error al crear persona: ${error.message}`);
