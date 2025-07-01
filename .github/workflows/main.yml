@@ -69,7 +69,7 @@ jobs:
           allenvs:     true
           script: |
             echo "✅ Conexión SSH exitosa"
-            echo "$ENV_B64" | base64 -d > /tmp/env.list
+            
 
 
       # ── Despliegue ─────────────────────────────────────
@@ -86,6 +86,9 @@ jobs:
           envs:        DOCKER_IMAGE,ENV_B64
           script: |
             set -Eeuo pipefail
+            echo "$ENV_B64" | base64 -d > /tmp/env.list
+            echo "👉 Variables decodificadas en /tmp/env.list"
+            cat /tmp/env.list
 
             echo "🛫  Actualizando imagen..."
             sudo docker pull $DOCKER_IMAGE
