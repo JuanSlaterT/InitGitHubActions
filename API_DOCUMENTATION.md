@@ -14,6 +14,8 @@ CREATE TABLE persona (
     url_image   VARCHAR(128) NOT NULL,
     team        VARCHAR(24)  NOT NULL,
     role        VARCHAR(32)  NOT NULL,
+    is_admin    BOOLEAN      DEFAULT FALSE,
+    is_enabled  BOOLEAN      DEFAULT TRUE,
     created_at  TIMESTAMPTZ  DEFAULT NOW(),
     updated_at  TIMESTAMPTZ  DEFAULT NOW()
 );
@@ -68,7 +70,9 @@ CREATE TABLE reconocimiento (
     "full_name": "Juan Pérez",
     "url_image": "https://ejemplo.com/imagen.jpg",
     "team": "Desarrollo",
-    "role": "Desarrollador"
+    "role": "Desarrollador",
+    "is_admin": false,
+    "is_enabled": true
 }
 ```
 - **Respuesta Exitosa** (201):
@@ -80,11 +84,17 @@ CREATE TABLE reconocimiento (
         "url_image": "https://ejemplo.com/imagen.jpg",
         "team": "Desarrollo",
         "role": "Desarrollador",
+        "is_admin": false,
+        "is_enabled": true,
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
     }
 }
 ```
+- **Notas**:
+  - `is_admin`: Indica si la persona es administrador (por defecto: false)
+  - `is_enabled`: Indica si la persona está habilitada (por defecto: true)
+  - Al crear una persona, se envía automáticamente un email de solicitud de aprobación a todos los administradores habilitados
 
 #### 2. Obtener Todas las Personas
 - **GET** `/api/persona`
@@ -99,6 +109,8 @@ CREATE TABLE reconocimiento (
             "url_image": "https://ejemplo.com/imagen1.jpg",
             "team": "Desarrollo",
             "role": "Desarrollador",
+            "is_admin": false,
+            "is_enabled": true,
             "created_at": "2024-01-15T10:30:00Z",
             "updated_at": "2024-01-15T10:30:00Z"
         },
@@ -108,6 +120,8 @@ CREATE TABLE reconocimiento (
             "url_image": "https://ejemplo.com/imagen2.jpg",
             "team": "Diseño",
             "role": "Diseñadora",
+            "is_admin": true,
+            "is_enabled": true,
             "created_at": "2024-01-15T11:00:00Z",
             "updated_at": "2024-01-15T11:00:00Z"
         }
@@ -128,6 +142,8 @@ CREATE TABLE reconocimiento (
         "url_image": "https://ejemplo.com/imagen.jpg",
         "team": "Desarrollo",
         "role": "Desarrollador",
+        "is_admin": false,
+        "is_enabled": true,
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
     }
@@ -151,7 +167,9 @@ CREATE TABLE reconocimiento (
     "full_name": "Juan Carlos Pérez",
     "url_image": "https://ejemplo.com/nueva-imagen.jpg",
     "team": "Desarrollo Senior",
-    "role": "Desarrollador Senior"
+    "role": "Desarrollador Senior",
+    "is_admin": false,
+    "is_enabled": true
 }
 ```
 - **Respuesta Exitosa** (200):
@@ -163,6 +181,8 @@ CREATE TABLE reconocimiento (
         "url_image": "https://ejemplo.com/nueva-imagen.jpg",
         "team": "Desarrollo Senior",
         "role": "Desarrollador Senior",
+        "is_admin": false,
+        "is_enabled": true,
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T12:00:00Z"
     }
@@ -182,6 +202,8 @@ CREATE TABLE reconocimiento (
         "url_image": "https://ejemplo.com/imagen.jpg",
         "team": "Desarrollo",
         "role": "Desarrollador",
+        "is_admin": false,
+        "is_enabled": true,
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
     },
@@ -565,6 +587,73 @@ CREATE TABLE reconocimiento (
 }
 ```
 
+## 🔗 APIs de LinkedIn
+
+### Base URL: `/api/linkedin`
+
+#### 1. Obtener Datos de LinkedIn
+- **GET** `/api/linkedin`
+- **Descripción**: Obtiene información de LinkedIn del usuario autenticado
+- **Headers**: Requiere headers de autenticación de LinkedIn
+- **Respuesta Exitosa** (200):
+```json
+{
+    "result": {
+        "id": "linkedin_user_id",
+        "firstName": "Juan",
+        "lastName": "Pérez",
+        "profilePicture": "https://linkedin.com/profile.jpg",
+        "email": "juan.perez@linkedin.com"
+    }
+}
+```
+
+#### 2. Callback de LinkedIn
+- **GET** `/api/linkedin/getLinkedin`
+- **Descripción**: Endpoint de callback para la autenticación OAuth de LinkedIn
+- **Parámetros**: `code` (string, código de autorización de LinkedIn)
+- **Respuesta Exitosa** (200):
+```json
+{
+    "success": true,
+    "redirectUrl": "https://www.linkedin.com/in/me/edit/forms/certification/new/?certId=POC-1234567890&certUrl=https://mi-app-poc.com/verify/POC-1234567890&isFromA2p=true&issueMonth=1&issueYear=2024&name=Certificado POC",
+    "user": {
+        "name": "Juan Pérez",
+        "email": "juan.perez@linkedin.com"
+    },
+    "cert": {
+        "name": "Certificado POC",
+        "id": "POC-1234567890",
+        "url": "https://mi-app-poc.com/verify/POC-1234567890",
+        "issuer": "Mi Compañía de Prueba",
+        "issueMonth": 1,
+        "issueYear": 2024
+    }
+}
+```
+
+## 📧 Funcionalidad de Email
+
+### Email de Reconocimiento
+Cuando se crea un reconocimiento, el sistema automáticamente:
+1. Consulta la información de la persona en la tabla `persona`
+2. Consulta la información del tipo de certificado en la tabla `cert_type`
+3. Envía un email de reconocimiento usando AWS SES
+4. Utiliza la plantilla `email_reconocimiento_template`
+
+### Email de Solicitud de Aprobación
+Cuando se crea una nueva persona, el sistema automáticamente:
+1. Envía un email de solicitud de aprobación a todos los administradores habilitados
+2. Utiliza la plantilla `email_approval_request_template`
+
+### Variables de Entorno Requeridas para Email
+- `AWS_REGION`: Región de AWS (por defecto: "us-east-1")
+- `AWS_ACCESS_KEY_ID`: Access Key de AWS
+- `AWS_SECRET_ACCESS_KEY`: Secret Access Key de AWS
+- `LINKEDIN_CLIENT_ID`: Client ID de la aplicación de LinkedIn
+- `LINKEDIN_CLIENT_SECRET`: Client Secret de la aplicación de LinkedIn
+- `LINKEDIN_REDIRECT_URI`: URI de redirección para OAuth de LinkedIn
+
 ## 🔧 Códigos de Estado HTTP
 
 - **200**: OK - Operación exitosa
@@ -636,6 +725,10 @@ curl -X GET http://localhost:3000/api/reconocimiento/stats
 6. **Logging**: Todas las operaciones se registran en los logs del sistema
 7. **Documentación Swagger**: Las APIs están documentadas en Swagger en `/doc`
 8. **Timestamps**: Todas las tablas incluyen timestamps automáticos para auditoría
+9. **Email Automático**: Al crear reconocimientos se envía automáticamente un email de notificación
+10. **Solicitud de Aprobación**: Al crear personas se envía automáticamente un email de solicitud de aprobación a los administradores
+11. **Campos de Administración**: La tabla `persona` incluye campos `is_admin` e `is_enabled` para gestión de permisos
+12. **Integración LinkedIn**: Disponible para autenticación OAuth y generación de URLs de certificación
 
 ## 🔍 Endpoints Disponibles
 
@@ -664,6 +757,10 @@ curl -X GET http://localhost:3000/api/reconocimiento/stats
 - `GET /api/reconocimiento/tipo/{tipo}` - Obtener reconocimientos por tipo
 - `PUT /api/reconocimiento/{id}` - Actualizar reconocimiento
 - `DELETE /api/reconocimiento/{id}` - Eliminar reconocimiento
+
+### LinkedIn
+- `GET /api/linkedin` - Obtener datos de LinkedIn
+- `GET /api/linkedin/getLinkedin` - Callback de autenticación OAuth de LinkedIn
 
 ## 📊 Datos de Prueba Incluidos
 
