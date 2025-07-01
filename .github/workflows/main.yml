@@ -10,7 +10,8 @@ env:
   DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
   EC2_USER: ec2-user
   EC2_PORT: 22
-  
+  ENV_B64: ${{ secrets.BACKEND_ENV_B64 }}
+
 
 jobs:
 # ─────────────────────────────────────────────────────────
@@ -66,7 +67,10 @@ jobs:
           port:        ${{ env.EC2_PORT }}
           debug:       true
           allenvs:     true
-          script:      echo "✅ Conexión SSH exitosa"
+          script: |
+            echo "✅ Conexión SSH exitosa"
+            echo "$ENV_B64" | base64 -d > /tmp/env.list
+
 
       # ── Despliegue ─────────────────────────────────────
       - name: Deploy backend
@@ -93,6 +97,7 @@ jobs:
             sudo docker run -d \
               --name backend \
               --restart=always \
+              --env-file /tmp/env.list \
               -p 80:8080 \
               $DOCKER_IMAGE
 
