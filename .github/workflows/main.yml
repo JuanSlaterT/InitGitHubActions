@@ -52,31 +52,31 @@ jobs:
           script: |
             echo "✅ Conexión SSH exitosa desde GitHub Actions"
 
-      - name: Deploy backend
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: true
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22
-          script: |
-            set -euo pipefail
-
-            echo "🛫  Actualizando imagen..."
-            sudo docker pull registry.example.com/backend:stable
-
-            echo "⛔  Deteniendo contenedor anterior (si existe)..."
-            sudo docker rm -f backend 2>/dev/null || true
-
-            echo "🚀  Lanzando contenedor..."
-            sudo docker run -d \
-              --name backend \
-              --restart=always \
-              -p 80:3000 \
-              registry.example.com/backend:stable
-
-            echo "🧹  Limpiando imágenes antiguas..."
-            sudo docker image prune -f
-
+            - name: Deploy backend
+            uses: appleboy/ssh-action@v1.0.0
+            with:
+              host:        ${{ secrets.EC2_HOST }}
+              username:    ec2-user                # o ubuntu, etc.
+              key:         ${{ secrets.SSH_PRIVATE_KEY }}
+              passphrase:  ${{ secrets.SSH_PASSPHRASE }}
+              port:        22
+              debug:       true          # deja activo hasta que funcione
+              script_stop: true          # aborta si un comando da error
+              script: |
+                set -Eeuo pipefail           # -E conserva traps con 'set -e'
+          
+                echo "🛫  Actualizando imagen..."
+                sudo docker pull registry.example.com/backend:stable
+          
+                echo "⛔  Deteniendo contenedor anterior (si existe)..."
+                sudo docker rm -f backend 2>/dev/null || true
+          
+                echo "🚀  Lanzando contenedor..."
+                sudo docker run -d \
+                  --name backend \
+                  --restart=always \
+                  -p 80:3000 \
+                  registry.example.com/backend:stable
+          
+                echo "🧹  Limpiando imágenes antiguas..."
+                sudo docker image prune -f
