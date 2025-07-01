@@ -20,6 +20,8 @@ const router = express.Router();
  *               - url_image
  *               - team
  *               - role
+ *               - is_admin
+ *               - is_enabled
  *             properties:
  *               email:
  *                 type: string
@@ -41,6 +43,12 @@ const router = express.Router();
  *                 type: string
  *                 maxLength: 32
  *                 description: Rol de la persona
+ *               is_admin:
+ *                 type: boolean
+ *                 description: Indica si la persona es admin
+ *               is_enabled:
+ *                 type: boolean
+ *                 description: Indica si la persona está habilitada
  *     responses:
  *       201:
  *         description: Persona creada exitosamente
@@ -118,6 +126,12 @@ router.get('/:email', PersonaController.getPersonaByEmail);
  *               role:
  *                 type: string
  *                 maxLength: 32
+ *               is_admin:
+ *                 type: boolean
+ *                 description: Indica si la persona es admin
+ *               is_enabled:
+ *                 type: boolean
+ *                 description: Indica si la persona está habilitada
  *     responses:
  *       200:
  *         description: Persona actualizada exitosamente

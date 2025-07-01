@@ -49,7 +49,7 @@ async function createReconocimiento(reconocimientoData) {
                 userRole: persona.role,
                 issueDate: issueDate,
                 expiryDate: null, // Sin fecha de expiración por defecto
-                ctaUrl: null, // Sin URL de CTA por defecto
+                ctaUrl: "https://www.ixcsvs.online/certificate/" + result.id, // Sin URL de CTA por defecto
                 currentYear: currentYear.toString()
             });
         } catch (emailError) {

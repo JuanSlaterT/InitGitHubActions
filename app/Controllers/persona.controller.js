@@ -22,6 +22,9 @@ async function createPersona(req, res, next) {
         });
 
         const personaData = req.body;
+        // Aseguramos que los campos is_admin e is_enabled estén presentes aunque sean undefined
+        if (typeof personaData.is_admin === 'undefined') personaData.is_admin = false;
+        if (typeof personaData.is_enabled === 'undefined') personaData.is_enabled = true;
         const result = await personaService.createPersona(personaData);
 
         logFormat({
@@ -137,6 +140,9 @@ async function updatePersona(req, res, next) {
             data: { email, updateData }
         });
 
+        // Aseguramos que los campos is_admin e is_enabled estén presentes aunque sean undefined
+        if (typeof updateData.is_admin === 'undefined') updateData.is_admin = false;
+        if (typeof updateData.is_enabled === 'undefined') updateData.is_enabled = true;
         const result = await personaService.updatePersona(email, updateData);
 
         if (!result) {
