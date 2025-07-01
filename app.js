@@ -1,42 +1,38 @@
-require('dotenv').config()
-global.appRoot = __dirname.replace(/'\'/g, '/')
-const moment = require('moment-timezone')
-moment.tz.setDefault(process.env.TIMEZONE)
+require('dotenv').config();
+global.appRoot = __dirname.replace(/\\/g, '/');
 
-const express = require('express')
-const cors = require('cors')
+const moment = require('moment-timezone');
+moment.tz.setDefault(process.env.TIMEZONE);
 
-const logger = require('./config/logger')
-const routes = require('./config/routes')
-const {handlerErrors} = require('./config/handler')
+const express = require('express');
+const cors = require('cors');
 
-logger.info('Starting server...')
+const logger         = require('./config/logger');
+const routes         = require('./config/routes');
+const { handlerErrors } = require('./config/handler');
 
-const app = express()
-const swaggerUi = require('swagger-ui-express')
-const swaggerFile = require('./swagger_output_arquetipo.json')
+logger.info('Starting server...');
 
-app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+const app = express();
 
-app.use(cors())
+const swaggerUi   = require('swagger-ui-express');
+const swaggerFile = require('./swagger_output_arquetipo.json');
 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Credentials', 'true')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST')
-    res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers')
-    res.setHeader('Content-Type', 'application/json')
-    return next()
-})
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-app.use(express.json())
+/* ────────────────  CORS completamente abierto  ──────────────── */
+app.use(cors());           // ← esto ya envía Access-Control-Allow-Origin: *
+app.options('*', cors());  // ← responde a los preflight OPTIONS
+/* ────────────────────────────────────────────────────────────── */
 
-app.use('/api', routes.v1)
-app.use(handlerErrors)
+app.use(express.json());
 
-// Ruta por defecto para páginas no encontradas
-app.use((req, res) => {
-    return res.status(404).send({status: 'ERROR', message: 'Página no encontrada'})
-})
+app.use('/api', routes.v1);
+app.use(handlerErrors);
 
-module.exports = app
+/* 404 */
+app.use((req, res) =>
+  res.status(404).json({ status: 'ERROR', message: 'Página no encontrada' })
+);
+
+module.exports = app;
