@@ -36,6 +36,7 @@ jobs:
           docker tag backend ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:stable
 
+
   deploy-to-ec2:
     needs: build-and-push 
     runs-on: ubuntu-latest
