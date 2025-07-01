@@ -8,19 +8,20 @@ const { db } = require('../../config/database');
  * @param {string} personaData.url_image - URL de la imagen
  * @param {string} personaData.team - Equipo
  * @param {string} personaData.role - Rol
+ * @param {boolean} personaData.isAdmin - Indica si la persona es admin
  * @returns {Object} Persona creada
  */
 async function createPersona(personaData) {
-    const { email, full_name, url_image, team, role } = personaData;
+    const { email, full_name, url_image, team, role, isAdmin } = personaData;
     
     const query = `
-        INSERT INTO persona (email, full_name, url_image, team, role)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO persona (email, full_name, url_image, team, role, isAdmin)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
     `;
     
     try {
-        const result = await db.one(query, [email, full_name, url_image, team, role]);
+        const result = await db.one(query, [email, full_name, url_image, team, role, isAdmin]);
         return result;
     } catch (error) {
         throw new Error(`Error al crear persona: ${error.message}`);
@@ -66,20 +67,21 @@ async function getPersonaByEmail(email) {
  * @param {string} updateData.url_image - URL de la imagen
  * @param {string} updateData.team - Equipo
  * @param {string} updateData.role - Rol
+ * @param {boolean} updateData.isAdmin - Indica si la persona es admin
  * @returns {Object} Persona actualizada
  */
 async function updatePersona(email, updateData) {
-    const { full_name, url_image, team, role } = updateData;
+    const { full_name, url_image, team, role, isAdmin } = updateData;
     
     const query = `
         UPDATE persona 
-        SET full_name = $1, url_image = $2, team = $3, role = $4
-        WHERE email = $5
+        SET full_name = $1, url_image = $2, team = $3, role = $4, isAdmin = $5
+        WHERE email = $6
         RETURNING *
     `;
     
     try {
-        const result = await db.oneOrNone(query, [full_name, url_image, team, role, email]);
+        const result = await db.oneOrNone(query, [full_name, url_image, team, role, isAdmin, email]);
         return result;
     } catch (error) {
         throw new Error(`Error al actualizar persona: ${error.message}`);
