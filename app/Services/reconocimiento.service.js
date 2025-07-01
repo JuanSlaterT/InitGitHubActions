@@ -21,6 +21,7 @@ async function createReconocimiento(reconocimientoData) {
     `;
     
     try {
+        
         // Crear el reconocimiento
         const result = await db.one(query, [email_persona, cert_type_id, meeting]);
         
