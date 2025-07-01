@@ -92,7 +92,7 @@ jobs:
             sudo docker run -d \
               --name backend \
               --restart=always \
-              -p 80:3000 \
+              -p 80:8080 \
               $DOCKER_IMAGE
 
             echo "🧹  Limpiando imágenes antiguas..."
