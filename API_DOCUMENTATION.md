@@ -6,6 +6,7 @@ Esta documentación describe las APIs para gestionar personas, tipos de certific
 
 ## 🏗️ Estructura de Base de Datos
 
+
 ### Tabla: `persona`
 ```sql
 CREATE TABLE persona (
