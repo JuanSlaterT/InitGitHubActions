@@ -1,12 +1,12 @@
 const reconocimientoService = require('../app/Services/reconocimiento.service');
 const personaService = require('../app/Services/persona.service');
 const certTypeService = require('../app/Services/certType.service');
-const { sendRecognitionEmail } = require('../app/Services/SES.service');
+const { sendRecognitionEmail } = require('../app/Services/SG.service');
 
 // Mock the dependencies
 jest.mock('../app/Services/persona.service');
 jest.mock('../app/Services/certType.service');
-jest.mock('../app/Services/SES.service');
+jest.mock('../app/Services/SG.service');
 jest.mock('../config/database', () => ({
   db: {
     one: jest.fn()

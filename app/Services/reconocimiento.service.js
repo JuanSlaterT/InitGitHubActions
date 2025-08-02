@@ -1,7 +1,7 @@
 const { db } = require('../../config/database');
 const personaService = require('./persona.service');
 const certTypeService = require('./certType.service');
-const { sendRecognitionEmail } = require('./SES.service');
+const { sendRecognitionEmail } = require('./SG.service');
 
 /**
  * Crear un nuevo reconocimiento

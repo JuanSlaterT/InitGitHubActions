@@ -1,5 +1,5 @@
 const { db } = require('../../config/database');
-const { sendApprovalRequestEmail } = require('./SES.service');
+const { sendApprovalRequestEmail } = require('./SG.service');
 
 /**
  * Crear una nueva persona

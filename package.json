@@ -12,7 +12,7 @@
   "author": "IX Comercio",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-ses": "^3.840.0",
+    "@sendgrid/mail": "^8.1.5",
     "axios": "^1.7.2",
     "bluebird": "^3.7.2",
     "compression": "^1.7.4",

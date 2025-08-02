@@ -9,15 +9,15 @@ Se ha integrado exitosamente la funcionalidad de envío de emails en la función
 - **Importaciones agregadas**:
   - `personaService` para consultar información de la persona
   - `certTypeService` para consultar información del tipo de certificado
-  - `sendRecognitionEmail` de `SES.service.js`
+  - `sendRecognitionEmail` de `SG.service.js`
 
 - **Lógica agregada**:
   - Consulta automática de la información de la persona (nombre y rol) usando el email
   - Consulta automática de la información del tipo de certificado usando el cert_type_id
-  - Envío automático de email usando AWS SES
+  - Envío automático de email usando SendGrid
   - Manejo de errores que no interrumpe la creación del reconocimiento
 
-### 2. Conversión de `app/Services/SES.service.js`
+### 2. Conversión de `app/Services/SG.service.js`
 
 - Convertido de ES modules (import/export) a CommonJS (require/module.exports)
 - Mantiene la misma funcionalidad de envío de emails
@@ -76,7 +76,7 @@ Para que el email funcione correctamente, se necesitan las siguientes variables 
 
 ## Plantilla de Email
 
-El sistema utiliza la plantilla `email_reconocimiento_template` configurada en AWS SES.
+El sistema utiliza la plantilla configurada en SendGrid con template ID.
 
 ## Tests
 

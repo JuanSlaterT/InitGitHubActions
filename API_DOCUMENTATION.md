@@ -386,7 +386,7 @@ CREATE TABLE reconocimiento (
 - **Notas**:
   - El sistema automáticamente consulta la información de la persona (nombre y rol) en la tabla `persona`
   - El sistema consulta la información del tipo de certificado en la tabla `cert_type`
-  - Se envía un email de reconocimiento usando AWS SES con la plantilla `email_reconocimiento_template`
+  - Se envía un email de reconocimiento usando SendGrid con la plantilla configurada
   - Si el envío del email falla, el reconocimiento se crea igualmente pero se registra el error en los logs
 
 #### 2. Obtener Todos los Reconocimientos
@@ -639,7 +639,7 @@ CREATE TABLE reconocimiento (
 Cuando se crea un reconocimiento, el sistema automáticamente:
 1. Consulta la información de la persona en la tabla `persona`
 2. Consulta la información del tipo de certificado en la tabla `cert_type`
-3. Envía un email de reconocimiento usando AWS SES
+3. Envía un email de reconocimiento usando SendGrid
 4. Utiliza la plantilla `email_reconocimiento_template`
 
 ### Email de Solicitud de Aprobación
