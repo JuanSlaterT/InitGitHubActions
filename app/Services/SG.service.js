@@ -22,7 +22,7 @@ async function sendApprovalRequestEmail({
       email: 'noreply@ixcsvs.online',
       name: 'IXComercio'
     },
-    templateId: "", 
+    templateId: "d-a9a06727f3834ea28fb61c9ac9392b7d", 
     dynamicTemplateData: {
       admin_name: adminName,
       new_user_name: newUserName,
