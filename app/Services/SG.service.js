@@ -108,6 +108,7 @@ async function sendEmail({
     attachments: attachments
   };
 
+  
   try {
     const response = await sgMail.send(msg);
     return response;
