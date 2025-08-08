@@ -15,14 +15,10 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - email_persona
  *               - cert_type_id
  *               - meeting
+ *               - nombre_colaborador
  *             properties:
- *               email_persona:
- *                 type: string
- *                 format: email
- *                 description: Email de la persona que recibe el reconocimiento
  *               cert_type_id:
  *                 type: integer
  *                 description: ID del tipo de certificado
@@ -30,13 +26,17 @@ const router = express.Router();
  *                 type: string
  *                 maxLength: 64
  *                 description: Reunión donde se otorgó el reconocimiento
+ *               nombre_colaborador:
+ *                 type: string
+ *                 maxLength: 120
+ *                 description: Nombre del colaborador que recibe el reconocimiento
  *     responses:
  *       201:
  *         description: Reconocimiento creado exitosamente
  *       400:
  *         description: Datos inválidos
  *       404:
- *         description: Persona o tipo de certificado no encontrado
+ *         description: Tipo de certificado no encontrado
  */
 router.post('/', ReconocimientoController.createReconocimiento);
 
@@ -75,8 +75,9 @@ router.get('/stats', ReconocimientoController.getReconocimientoStats);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID del reconocimiento
+ *           type: string
+ *           format: uuid
+ *         description: ID del reconocimiento (UUID)
  *     responses:
  *       200:
  *         description: Reconocimiento encontrado
@@ -87,23 +88,22 @@ router.get('/:id', ReconocimientoController.getReconocimientoById);
 
 /**
  * @swagger
- * /api/reconocimiento/email/{email}:
+ * /api/reconocimiento/colaborador/{nombre_colaborador}:
  *   get:
- *     summary: Obtener reconocimientos por email de persona
+ *     summary: Obtener reconocimientos por nombre de colaborador
  *     tags: [Reconocimiento]
  *     parameters:
  *       - in: path
- *         name: email
+ *         name: nombre_colaborador
  *         required: true
  *         schema:
  *           type: string
- *           format: email
- *         description: Email de la persona
+ *         description: Nombre del colaborador
  *     responses:
  *       200:
  *         description: Reconocimientos encontrados
  */
-router.get('/email/:email', ReconocimientoController.getReconocimientosByEmail);
+router.get('/colaborador/:nombre_colaborador', ReconocimientoController.getReconocimientosByColaborador);
 
 /**
  * @swagger
@@ -154,8 +154,9 @@ router.get('/tipo/:tipo', ReconocimientoController.getReconocimientosByTipo);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID del reconocimiento a actualizar
+ *           type: string
+ *           format: uuid
+ *         description: ID del reconocimiento a actualizar (UUID)
  *     requestBody:
  *       required: true
  *       content:
@@ -163,14 +164,14 @@ router.get('/tipo/:tipo', ReconocimientoController.getReconocimientosByTipo);
  *           schema:
  *             type: object
  *             properties:
- *               email_persona:
- *                 type: string
- *                 format: email
  *               cert_type_id:
  *                 type: integer
  *               meeting:
  *                 type: string
  *                 maxLength: 64
+ *               nombre_colaborador:
+ *                 type: string
+ *                 maxLength: 120
  *     responses:
  *       200:
  *         description: Reconocimiento actualizado exitosamente
@@ -190,8 +191,9 @@ router.put('/:id', ReconocimientoController.updateReconocimiento);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID del reconocimiento a eliminar
+ *           type: string
+ *           format: uuid
+ *         description: ID del reconocimiento a eliminar (UUID)
  *     responses:
  *       200:
  *         description: Reconocimiento eliminado exitosamente

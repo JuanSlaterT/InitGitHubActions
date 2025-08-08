@@ -36,18 +36,12 @@ CREATE TABLE cert_type (
 ### Tabla: `reconocimiento`
 ```sql
 CREATE TABLE reconocimiento (
-    id              INTEGER       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    email_persona   VARCHAR(64)   NOT NULL,
-    cert_type_id    INTEGER       NOT NULL,
-    meeting         VARCHAR(64)   NOT NULL,
-    created_at      TIMESTAMPTZ   DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ   DEFAULT NOW(),
-
-    CONSTRAINT fk_recon_persona
-        FOREIGN KEY (email_persona)
-        REFERENCES persona(email)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
+    id                    UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    cert_type_id          INTEGER       NOT NULL,
+    meeting               VARCHAR(64)   NOT NULL,
+    nombre_colaborador    VARCHAR(120)  NOT NULL,
+    created_at            TIMESTAMPTZ   DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ   DEFAULT NOW(),
 
     CONSTRAINT fk_recon_cert_type
         FOREIGN KEY (cert_type_id)
@@ -360,52 +354,47 @@ CREATE TABLE reconocimiento (
 
 #### 1. Crear Reconocimiento
 - **POST** `/api/reconocimiento`
-- **Descripción**: Crea un nuevo reconocimiento para una persona y envía un email de notificación automáticamente
+- **Descripción**: Crea un nuevo reconocimiento para un colaborador
 - **Body**:
 ```json
 {
-    "email_persona": "usuario@ejemplo.com",
     "cert_type_id": 1,
-    "meeting": "Reunión Mensual Enero"
+    "meeting": "Reunión Mensual Enero",
+    "nombre_colaborador": "Juan Pérez"
 }
 ```
 - **Respuesta Exitosa** (201):
 ```json
 {
     "result": {
-        "id": 1,
-        "email_persona": "usuario@ejemplo.com",
+        "id": "123e4567-e89b-12d3-a456-426614174000",
         "cert_type_id": 1,
         "meeting": "Reunión Mensual Enero",
+        "nombre_colaborador": "Juan Pérez",
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
     },
-    "message": "Reconocimiento creado exitosamente y email enviado"
+    "message": "Reconocimiento creado exitosamente"
 }
 ```
 - **Notas**:
-  - El sistema automáticamente consulta la información de la persona (nombre y rol) en la tabla `persona`
-  - El sistema consulta la información del tipo de certificado en la tabla `cert_type`
-  - Se envía un email de reconocimiento usando SendGrid con la plantilla configurada
-  - Si el envío del email falla, el reconocimiento se crea igualmente pero se registra el error en los logs
+  - El sistema verifica que el tipo de certificado existe en la tabla `cert_type`
+  - El ID del reconocimiento se genera automáticamente como UUID
 
 #### 2. Obtener Todos los Reconocimientos
 - **GET** `/api/reconocimiento`
-- **Descripción**: Obtiene todos los reconocimientos con información completa de persona y tipo de certificado
+- **Descripción**: Obtiene todos los reconocimientos con información completa del tipo de certificado
 - **Respuesta Exitosa** (200):
 ```json
 {
     "result": [
         {
-            "id": 1,
-            "email_persona": "usuario@ejemplo.com",
+            "id": "123e4567-e89b-12d3-a456-426614174000",
             "cert_type_id": 1,
             "meeting": "Reunión Mensual Enero",
+            "nombre_colaborador": "Juan Pérez",
             "created_at": "2024-01-15T10:30:00Z",
             "updated_at": "2024-01-15T10:30:00Z",
-            "full_name": "Juan Pérez",
-            "team": "Desarrollo",
-            "role": "Desarrollador",
             "cert_type_tipo": "KUDOS",
             "cert_type_nombre": "Reconocimiento por colaboración"
         }
@@ -416,44 +405,38 @@ CREATE TABLE reconocimiento (
 #### 3. Obtener Reconocimiento por ID
 - **GET** `/api/reconocimiento/{id}`
 - **Descripción**: Obtiene un reconocimiento específico por su ID
-- **Parámetros**: `id` (integer)
+- **Parámetros**: `id` (string, UUID)
 - **Respuesta Exitosa** (200):
 ```json
 {
     "result": {
-        "id": 1,
-        "email_persona": "usuario@ejemplo.com",
+        "id": "123e4567-e89b-12d3-a456-426614174000",
         "cert_type_id": 1,
         "meeting": "Reunión Mensual Enero",
+        "nombre_colaborador": "Juan Pérez",
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z",
-        "full_name": "Juan Pérez",
-        "team": "Desarrollo",
-        "role": "Desarrollador",
         "cert_type_tipo": "KUDOS",
         "cert_type_nombre": "Reconocimiento por colaboración"
     }
 }
 ```
 
-#### 4. Obtener Reconocimientos por Email
-- **GET** `/api/reconocimiento/email/{email}`
-- **Descripción**: Obtiene todos los reconocimientos de una persona específica
-- **Parámetros**: `email` (string, formato email)
+#### 4. Obtener Reconocimientos por Colaborador
+- **GET** `/api/reconocimiento/colaborador/{nombre_colaborador}`
+- **Descripción**: Obtiene todos los reconocimientos de un colaborador específico
+- **Parámetros**: `nombre_colaborador` (string)
 - **Respuesta Exitosa** (200):
 ```json
 {
     "result": [
         {
-            "id": 1,
-            "email_persona": "usuario@ejemplo.com",
+            "id": "123e4567-e89b-12d3-a456-426614174000",
             "cert_type_id": 1,
             "meeting": "Reunión Mensual Enero",
+            "nombre_colaborador": "Juan Pérez",
             "created_at": "2024-01-15T10:30:00Z",
             "updated_at": "2024-01-15T10:30:00Z",
-            "full_name": "Juan Pérez",
-            "team": "Desarrollo",
-            "role": "Desarrollador",
             "cert_type_tipo": "KUDOS",
             "cert_type_nombre": "Reconocimiento por colaboración"
         }
@@ -470,15 +453,12 @@ CREATE TABLE reconocimiento (
 {
     "result": [
         {
-            "id": 1,
-            "email_persona": "usuario@ejemplo.com",
+            "id": "123e4567-e89b-12d3-a456-426614174000",
             "cert_type_id": 1,
             "meeting": "Reunión Mensual Enero",
+            "nombre_colaborador": "Juan Pérez",
             "created_at": "2024-01-15T10:30:00Z",
             "updated_at": "2024-01-15T10:30:00Z",
-            "full_name": "Juan Pérez",
-            "team": "Desarrollo",
-            "role": "Desarrollador",
             "cert_type_tipo": "KUDOS",
             "cert_type_nombre": "Reconocimiento por colaboración"
         }
@@ -495,15 +475,12 @@ CREATE TABLE reconocimiento (
 {
     "result": [
         {
-            "id": 1,
-            "email_persona": "usuario@ejemplo.com",
+            "id": "123e4567-e89b-12d3-a456-426614174000",
             "cert_type_id": 1,
             "meeting": "Reunión Mensual Enero",
+            "nombre_colaborador": "Juan Pérez",
             "created_at": "2024-01-15T10:30:00Z",
             "updated_at": "2024-01-15T10:30:00Z",
-            "full_name": "Juan Pérez",
-            "team": "Desarrollo",
-            "role": "Desarrollador",
             "cert_type_tipo": "KUDOS",
             "cert_type_nombre": "Reconocimiento por colaboración"
         }
@@ -520,21 +497,21 @@ CREATE TABLE reconocimiento (
     "result": [
         {
             "total_reconocimientos": "10",
-            "personas_con_reconocimientos": "8",
+            "colaboradores_con_reconocimientos": "8",
             "tipo": "KUDOS",
             "nombre": "Reconocimiento por colaboración",
             "count_by_type": "5"
         },
         {
             "total_reconocimientos": "10",
-            "personas_con_reconocimientos": "8",
+            "colaboradores_con_reconocimientos": "8",
             "tipo": "ACHIEVEMENT",
             "nombre": "Logro destacado del sprint",
             "count_by_type": "3"
         },
         {
             "total_reconocimientos": "10",
-            "personas_con_reconocimientos": "8",
+            "colaboradores_con_reconocimientos": "8",
             "tipo": "THANKYOU",
             "nombre": "Agradecimiento especial",
             "count_by_type": "2"
@@ -546,23 +523,23 @@ CREATE TABLE reconocimiento (
 #### 8. Actualizar Reconocimiento
 - **PUT** `/api/reconocimiento/{id}`
 - **Descripción**: Actualiza un reconocimiento existente
-- **Parámetros**: `id` (integer)
+- **Parámetros**: `id` (string, UUID)
 - **Body**:
 ```json
 {
-    "email_persona": "usuario@ejemplo.com",
     "cert_type_id": 2,
-    "meeting": "Reunión Mensual Enero Actualizada"
+    "meeting": "Reunión Mensual Enero Actualizada",
+    "nombre_colaborador": "Juan Pérez Actualizado"
 }
 ```
 - **Respuesta Exitosa** (200):
 ```json
 {
     "result": {
-        "id": 1,
-        "email_persona": "usuario@ejemplo.com",
+        "id": "123e4567-e89b-12d3-a456-426614174000",
         "cert_type_id": 2,
         "meeting": "Reunión Mensual Enero Actualizada",
+        "nombre_colaborador": "Juan Pérez Actualizado",
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T12:00:00Z"
     }
@@ -572,15 +549,15 @@ CREATE TABLE reconocimiento (
 #### 9. Eliminar Reconocimiento
 - **DELETE** `/api/reconocimiento/{id}`
 - **Descripción**: Elimina un reconocimiento específico
-- **Parámetros**: `id` (integer)
+- **Parámetros**: `id` (string, UUID)
 - **Respuesta Exitosa** (200):
 ```json
 {
     "result": {
-        "id": 1,
-        "email_persona": "usuario@ejemplo.com",
+        "id": "123e4567-e89b-12d3-a456-426614174000",
         "cert_type_id": 1,
         "meeting": "Reunión Mensual Enero",
+        "nombre_colaborador": "Juan Pérez",
         "created_at": "2024-01-15T10:30:00Z",
         "updated_at": "2024-01-15T10:30:00Z"
     },
@@ -634,13 +611,6 @@ CREATE TABLE reconocimiento (
 ```
 
 ## 📧 Funcionalidad de Email
-
-### Email de Reconocimiento
-Cuando se crea un reconocimiento, el sistema automáticamente:
-1. Consulta la información de la persona en la tabla `persona`
-2. Consulta la información del tipo de certificado en la tabla `cert_type`
-3. Envía un email de reconocimiento usando SendGrid
-4. Utiliza la plantilla `email_reconocimiento_template`
 
 ### Email de Solicitud de Aprobación
 Cuando se crea una nueva persona, el sistema automáticamente:

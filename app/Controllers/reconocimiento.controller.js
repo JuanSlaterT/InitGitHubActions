@@ -27,17 +27,13 @@ async function createReconocimiento(req, res, next) {
             file: 'reconocimiento.controller',
             headers: req.headers,
             _function: 'createReconocimiento',
-            message: 'Reconocimiento creado exitosamente con email enviado',
-            data: { 
-                result,
-                email_sent: true,
-                email_recipient: reconocimientoData.email_persona
-            }
+            message: 'Reconocimiento creado exitosamente',
+            data: { result }
         });
 
         res.status(201).send({ 
             result,
-            message: 'Reconocimiento creado exitosamente y email enviado'
+            message: 'Reconocimiento creado exitosamente'
         });
     } catch (error) {
         next(error);
@@ -122,33 +118,33 @@ async function getReconocimientoById(req, res, next) {
 }
 
 /**
- * Controlador para obtener reconocimientos por email de persona
- * @param {Request} req - Request con el email en params
+ * Controlador para obtener reconocimientos por nombre de colaborador
+ * @param {Request} req - Request con el nombre en params
  * @param {Response} res - Response para enviar la respuesta
  * @param {NextFunction} next - Función next para manejo de errores
  */
-async function getReconocimientosByEmail(req, res, next) {
+async function getReconocimientosByColaborador(req, res, next) {
     try {
-        const { email } = req.params;
-        console.log('Se recibe el request en getReconocimientosByEmail');
+        const { nombre_colaborador } = req.params;
+        console.log('Se recibe el request en getReconocimientosByColaborador');
         logFormat({
             type: 'info',
             file: 'reconocimiento.controller',
             headers: req.headers,
-            _function: 'getReconocimientosByEmail',
-            message: 'Se recibe el request para obtener reconocimientos por email',
-            data: { email }
+            _function: 'getReconocimientosByColaborador',
+            message: 'Se recibe el request para obtener reconocimientos por colaborador',
+            data: { nombre_colaborador }
         });
 
-        const result = await reconocimientoService.getReconocimientosByEmail(email);
+        const result = await reconocimientoService.getReconocimientosByColaborador(nombre_colaborador);
 
         logFormat({
             type: 'info',
             file: 'reconocimiento.controller',
             headers: req.headers,
-            _function: 'getReconocimientosByEmail',
+            _function: 'getReconocimientosByColaborador',
             message: 'Reconocimientos obtenidos exitosamente',
-            data: { email, count: result.length }
+            data: { nombre_colaborador, count: result.length }
         });
 
         res.status(200).send({ result });
@@ -359,7 +355,7 @@ module.exports = {
     createReconocimiento,
     getAllReconocimientos,
     getReconocimientoById,
-    getReconocimientosByEmail,
+    getReconocimientosByColaborador,
     getReconocimientosByCertTypeId,
     getReconocimientosByTipo,
     updateReconocimiento,
